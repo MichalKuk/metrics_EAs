@@ -1,12 +1,12 @@
-osobniki a,b,c,d,... bêd¹ce w przestrzeni "figurami wielowymiarowymi" A,B,C,D...
-HV = unia hiperprzestrzeni wszytskich osobników - to co liczymy
-hv(X) - obliczona hiperprzestrzeñ osobnika X
+osobniki a,b,c,d,... bÄ™dÄ…ce w przestrzeni "figurami wielowymiarowymi" A,B,C,D...
+HV = unia hiperprzestrzeni wszytskich osobnikÃ³w - to co liczymy
+hv(X) - obliczona hiperprzestrzeÅ„ osobnika X
 
 1. dodaj hv(A) do HV
-2. policz hv(B), odejmij od niego hv wspólne/przecinajace siê A i B (hv(A,B)), dodaj wynik do HV
-3. policz  hv(C), odejmij hv(C,A): i teraz nie mo¿napo porstu odj¹æ hv(C,B), bo bêdzie Ÿle. Zamiast tego w jakiœ sposób: odejmij hv(C,B), które NIE nale¿y do hv(A), dodaj wynik do HV
+2. policz hv(B), odejmij od niego hv wspÃ³lne/przecinajace siÄ™ A i B (hv(A,B)), dodaj wynik do HV
+3. policz  hv(C), odejmij hv(C,A): i teraz nie moÅ¼na po porstu odjÄ…Ä‡ hv(C,B), bo bÄ™dzie Åºle. Zamiast tego w jakiÅ› sposÃ³b: odejmij hv(C,B), ktÃ³re NIE naleÅ¼y do hv(A), dodaj wynik do HV
 4. policz hv(D), 
 	odejmij hv(D,A)
-	odejmij hv(D,B), które NIE nale¿y do hv(A),
-	odejmij hv(D,C), które NIE nale¿y do hv(A), ani hv(B)
+	odejmij hv(D,B), ktÃ³re NIE naleÅ¼y do hv(A),
+	odejmij hv(D,C), ktÃ³re NIE naleÅ¼y do hv(A), ani hv(B)
 5. itd.
