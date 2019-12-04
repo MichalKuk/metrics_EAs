@@ -1,0 +1,12 @@
+1. Mamy policzyć HV dla n "figur".
+
+2. Iterujemy po figurach
+  2.1 Jeżeli pierwsza to dodajemy ją do listy
+  2.2 W przeciwnym przypadku
+    3.Usuwamy z figury jej część wspólną z pierwszą figurą w liście. Czyli przesuwamy wierzchołki figury tak aby nie wchodziła 
+      w figurę pierwszą.
+      Nowo powstałą figurę porównujemy w ten sam sposób z każdą figurą z listy.
+      Po porwónaniu z każdą, dodajemy figurę do listy
+      
+W ten sposób otrzymamy listę figur które nie mają części wspólnych, a zamiast tego są styczne. Liczymy ich HV poprzez obliczenie
+ "pola" każdej figury osobno i zsumowanie tych pól.  
