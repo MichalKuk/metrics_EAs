@@ -1,0 +1,12 @@
+osobniki a,b,c,d,... będące w przestrzeni "figurami wielowymiarowymi" A,B,C,D...
+HV = unia hiperprzestrzeni wszytskich osobników - to co liczymy
+hv(X) - obliczona hiperprzestrzeń osobnika X
+
+1. dodaj hv(A) do HV
+2. policz hv(B), odejmij od niego hv wspólne/przecinajace się A i B (hv(A,B)), dodaj wynik do HV
+3. policz  hv(C), odejmij hv(C,A): i teraz nie można po porstu odjąć hv(C,B), bo będzie źle. Zamiast tego w jakiś sposób: odejmij hv(C,B), które NIE należy do hv(A), dodaj wynik do HV
+4. policz hv(D), 
+	odejmij hv(D,A)
+	odejmij hv(D,B), które NIE należy do hv(A),
+	odejmij hv(D,C), które NIE należy do hv(A), ani hv(B)
+5. itd.
