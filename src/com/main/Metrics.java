@@ -31,6 +31,8 @@ public class Metrics {
         return RNI;
     }
 
+
+
     //Overall Non-dominated Vector Generation: CARDINALITY
     public static int ONVG(List<Individual> set){
         int ONVG = set.size();
@@ -118,6 +120,7 @@ public class Metrics {
     }
 
 
+
     //Inverted Generational distance - IGD: ACCURACY (also diversity, but not in our case)
     public static double invertedGenerationalDistance(List<Individual> set, List<Individual> paretoOptimalSet){
         double IGD = -1, d2 = 0, d = 0, sum_d = 0, min_d = Double.MAX_VALUE;
@@ -149,6 +152,7 @@ public class Metrics {
     }
 
 
+
     /*Maximum Pareto Front Error - MPFE: ACCURACY
     It measures the largest distance in the objective space between any individual in the
     approximation front and the corresponding closest vector in the true Pareto front.*/
@@ -170,9 +174,10 @@ public class Metrics {
     }
 
 
-
-    //?not completed? reference point for HV - individual with the objectives with the worst values found in set
-    public static Individual generateReferencePoint(List<Individual> set1, List<Individual> set2, int numOfObjectives,
+    //do Hypervolume
+    //reference point for HV - individual with the objectives with the worst values found in set
+    //ALGOTYRM Z JMETAL NIE UŻYWA PUNKTU REFERENCYJNEGO, LICZY WZGLĘDEM POCZĄTKU UKŁADU WSPÓŁRZEDNYCH
+    private Individual generateReferencePoint(List<Individual> set1, List<Individual> set2, int numOfObjectives,
                                                        List<Integer> idsOfMinObjective){
         Individual referencePoint = new Individual();
         double worstArray [] = new double[numOfObjectives];//best value of each objective
@@ -213,18 +218,236 @@ public class Metrics {
     }
 
 
-    //Hypervolume - HV: ACCURACY, DIVERSITY, CARDINALITY
-    public static double HV_metric(List<Individual> set, Individual referencePoint){
-        double HV = -1;
-        List<Individual> countedIndividuals = new ArrayList<>();
-        countedIndividuals.add(referencePoint);
+    /*
+   returns true if 'point1' dominates 'points2' with respect to the
+   to the first 'noObjectives' objectives
+   */
+    private static boolean dominates(Individual point1, Individual point2, int noOfObjectives) {
+        int i;
+        int betterInAnyObjective;
 
-        for (Individual ind: set) {
-
+        betterInAnyObjective = 0;
+        for (i = 0; i < noOfObjectives &&
+                point1.getFitnessOfObjectiveByIndex(i) >= point2.getFitnessOfObjectiveByIndex(i); i++) {
+            if (point1.getFitnessOfObjectiveByIndex(i) > point2.getFitnessOfObjectiveByIndex(i)) {
+                betterInAnyObjective = 1;
+            }
         }
 
-        return ;
+        return ((i >= noOfObjectives) && (betterInAnyObjective > 0));
     }
+
+    /*
+    Swaps front[i][] with front[j][]
+     */
+    private static void swap(List<Individual> front, int i, int j) { /* chyba nie używamy, bo zmieniłem funkcję "filterNondominatedSet"
+    tak, że nie swapuje, tylko usuwa zdiminowane osobniki */
+        Individual temp;
+
+        temp = front.get(i);
+        front.set(i, front.get(j));
+        front.set(j, temp);
+    }
+//        private void swapOryginal(double[][] front, int i, int j) {
+//        double[] temp;
+//
+//        temp = front[i];
+//        front[i] = front[j];
+//        front[j] = temp;
+//    }
+
+
+    /* all nondominated points regarding the first 'noObjectives' dimensions
+    are collected; the points referenced by 'front[0..noPoints-1]' are
+    considered; 'front' is resorted, such that 'front[0..n-1]' contains
+    the nondominated points; n is returned */
+    private static int filterNondominatedSet(List<Individual> set, int noPoints, int noOfObjectives) {
+        int i = 0, j;
+        int n = noPoints;
+//        List<Individual> filteredFront = set;
+
+        while (i < n) {
+            j = i + 1;
+            while (j < n) {
+                if (dominates(set.get(i), set.get(j), noOfObjectives)) {
+                    /* remove point 'j' */
+                    n--;
+                    swap(set, j, n);
+                } else if (dominates(set.get(j), set.get(i), noOfObjectives)) {
+	                /* remove point 'i' */
+                    n--;
+                    swap(set, i, n);
+                    i--;
+                    break;
+                } else {
+                    j++;
+                }
+            }
+            i++;
+        }
+
+        return n;
+    }
+//    private int filterNondominatedSetOryginal(double[][] front, int noPoints, int noObjectives) {
+//        int i, j;
+//        int n;
+//
+//        n = noPoints;
+//        i = 0;
+//        while (i < n) {
+//            j = i + 1;
+//            while (j < n) {
+//                if (dominates(front[i], front[j], noObjectives)) {
+//                    /* remove point 'j' */
+//                    n--;
+//                    swap(front, j, n);
+//                } else if (dominates(front[j], front[i], noObjectives)) {
+//	/* remove point 'i'; ensure that the point copied to index 'i'
+//	   is considered in the next outer loop (thus, decrement i) */
+//                    n--;
+//                    swap(front, i, n);
+//                    i--;
+//                    break;
+//                } else {
+//                    j++;
+//                }
+//            }
+//            i++;
+//        }
+//        return n;
+//    }
+
+
+    /* calculate next value regarding dimension 'objective'; consider
+     points referenced in 'front[0..noPoints-1]' */
+    private static double surfaceUnchangedTo(List<Individual> set, int objective) {
+        double value;
+
+        if(set.size() >= 1){
+            double minValue = set.get(0).getFitnessOfObjectiveByIndex(objective);
+
+            for (Individual point : set) {
+                value = point.getFitnessOfObjectiveByIndex(objective);
+                if (value < minValue) {
+                    minValue = value;
+                }
+            }
+
+            return minValue;
+        }
+
+        //jakiś error czy exception zamist return 0?
+        return 0;
+    }
+//    private double surfaceUnchangedToOryginal(double[][] front, int noPoints, int objective) {
+//        int i;
+//        double minValue, value;
+//
+//        if (noPoints < 1) {
+//            new JMetalException("run-time error");
+//        }
+//
+//        minValue = front[0][objective];
+//        for (i = 1; i < noPoints; i++) {
+//            value = front[i][objective];
+//            if (value < minValue) {
+//                minValue = value;
+//            }
+//        }
+//        return minValue;
+//    }
+
+    /* remove all points which have a value <= 'threshold' regarding the
+     dimension 'objective'; the points referenced by
+     'front[0..noPoints-1]' are considered; 'front' is resorted, such that
+     'front[0..n-1]' contains the remaining points; 'n' is returned */
+    // trzeba zwrócić uwagę na kryteria MIN, nie wiem czy tutaj je inaczej obsłużyć, czy wcześniej zamienić je na MAX?
+    private static int reduceNondominatedSet(List<Individual> set, int noPoints, int objective, double threshold) {
+        int n = noPoints;
+
+        for (int i = 0; i < n; i++){
+            if(set.get(i).getFitnessOfObjectiveByIndex(objective) <= threshold){
+                n--;
+                swap(set, i, n);
+            }
+        }
+
+        return n;
+    }
+//    private int reduceNondominatedSetOryginal(double[][] front, int noPoints, int objective,
+//                                      double threshold) {
+//        int n;
+//        int i;
+//
+//        n = noPoints;
+//        for (i = 0; i < n; i++) {
+//            if (front[i][objective] <= threshold) {
+//                n--;
+//                swap(front, i, n);
+//            }
+//        }
+//
+//        return n;
+//    }
+
+    //Hypervolume - HV: ACCURACY, DIVERSITY, CARDINALITY
+    public static double HV_metric(List<Individual>  front, int noPoints, int noObjectives) {
+        int n = noPoints;
+        double volume = 0, distance = 0;
+
+        while(n > 0){
+            int nonDominatedPoints;
+            double tempVolume, tempDistance;
+
+            nonDominatedPoints = filterNondominatedSet(front, n, noObjectives - 1);
+
+            if (noObjectives < 3) {
+                if (nonDominatedPoints < 1) {
+                    return -1;
+                }
+                tempVolume = front.get(0).getFitnessOfObjectiveByIndex(0);
+            } else {
+                tempVolume = HV_metric(front, n, noObjectives - 1);
+            }
+
+            tempDistance = surfaceUnchangedTo(front, noObjectives - 1);
+            volume += tempVolume * (tempDistance - distance);
+            distance = tempDistance;
+            n = reduceNondominatedSet(front, n, noObjectives - 1, distance);
+        }
+
+        return volume;
+    }
+//    public double calculateHypervolumeOryginal(double[][] front, int noPoints, int noObjectives) {
+//        int n;
+//        double volume, distance;
+//
+//        volume = 0;
+//        distance = 0;
+//        n = noPoints;
+//        while (n > 0) {
+//            int nonDominatedPoints;
+//            double tempVolume, tempDistance;
+//
+//            nonDominatedPoints = filterNondominatedSet(front, n, noObjectives - 1);
+//            if (noObjectives < 3) {
+//                if (nonDominatedPoints < 1) {
+//                    new JMetalException("run-time error");
+//                }
+//
+//                tempVolume = front[0][0];
+//            } else {
+//                tempVolume = calculateHypervolumeOryginal(front, nonDominatedPoints, noObjectives - 1);
+//            }
+//
+//            tempDistance = surfaceUnchangedTo(front, n, noObjectives - 1);
+//            volume += tempVolume * (tempDistance - distance);
+//            distance = tempDistance;
+//            n = reduceNondominatedSet(front, n, noObjectives - 1, distance);
+//        }
+//        return volume;
+//    }
+
 
 
 //Metrics reffering to DISTRIBUTION
@@ -334,6 +557,7 @@ public class Metrics {
     }
 
 // Number of Distinct Choices (NDC)
+
 
 
 //SPREAD
