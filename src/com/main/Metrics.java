@@ -56,8 +56,8 @@ public class Metrics {
      * @param set2 - set of solutions from another algorithm
      * @param numOfObjectives - number of objectives in mulit-objective EA
      * @param idsOfMinObjective - indexes of objectives that are minimalized (in our problem there is sometimes 1 objective
-     *                         minimalized, all others are max); if no minimalized objective - e.g. idOfMinObjective = -1
-     * @return Individual optimalIndividual - artifically optimal Individual
+     *                         minimalized, all others are max); if no minimalized objective - empty list
+     * @return Individual optimalIndividual - artificially optimal Individual
      */
     public static Individual generateOptimalIndividual(List<Individual> set1, List<Individual> set2, int numOfObjectives,
                                                 List<Integer> idsOfMinObjective){
@@ -133,30 +133,41 @@ public class Metrics {
 
     /**
      *
-     * @param set - examined set of indiiduals
-     * @param paretoOptimalSet - true Pareto optimal set or artificall optimal set of individuals (or set of 1 individual)
+     * @param set - examined set of individuals
+     * @param paretoOptimalSet - true Pareto optimal set or artificial optimal set of individuals (or set of 1 individual)
      *      see Metrics.generateOptimalIndividual()
      *
      * @return Generational distance
      */
     //Generational distance - GD: ACCURACY
     public static double generationalDistance(List<Individual> set, List<Individual> paretoOptimalSet){
-        double d2 = 0, min_d2 = Double.MAX_VALUE, sumd2 = 0, GD = -1;
-        for (Individual ind: set) {//iterate thorugh examined individuals
+        double d = 0, min_d = Double.MAX_VALUE, sumd2 = 0, GD = -1;
+        for (Individual ind: set) {//iterate through examined individuals
             for (Individual optimalInd: paretoOptimalSet) {//iterate thorugh optimal individuals, looking for min d^2
-//                d2 = 0;
-//                for (int i = 0; i < ind.getFitnessOfObjectives().size(); i++) {//calculate d^2
-//                    d2 += Math.pow(ind.getFitnessOfObjectiveByIndex(i) - optimalInd.getFitnessOfObjectiveByIndex(i), 2);
-//                }
-                d2 = Math.pow(distance(ind, optimalInd), 2);
-                if (d2 < min_d2) min_d2 = d2;
+                d = distance(ind, optimalInd);
+                if (d < min_d) min_d = d;
             }
-            sumd2 += d2;
+            sumd2 += Math.pow(min_d, 2);
         }
         GD = Math.sqrt(sumd2)/set.size();
 
         return GD;
     }
+
+    //stare, był jeden błąd i szukame min_d^2, a nie min_d, chociaż powinno wyjść to samo
+//    public static double generationalDistance(List<Individual> set, List<Individual> paretoOptimalSet){
+//        double d2 = 0, min_d2 = Double.MAX_VALUE, sumd2 = 0, GD = -1;
+//        for (Individual ind: set) {//iterate through examined individuals
+//            for (Individual optimalInd: paretoOptimalSet) {//iterate thorugh optimal individuals, looking for min d^2
+//                d2 = Math.pow(distance(ind, optimalInd), 2);
+//                if (d2 < min_d2) min_d2 = d2;
+//            }
+//            sumd2 += min_d2; // += min_d2 !!!
+//        }
+//        GD = Math.sqrt(sumd2)/set.size();
+//
+//        return GD;
+//    }
 
     /**
      *
@@ -171,12 +182,7 @@ public class Metrics {
         double IGD = -1, d = 0, sum_d = 0, min_d = Double.MAX_VALUE;
 
         for (Individual ind: set) {//iterate thorugh test individuals
-            for (Individual optimalInd: paretoOptimalSet) {//iterate thorugh optimal individuals, looking for min d^2
-//                d2 = 0;
-//                for (int i = 0; i < ind.getFitnessOfObjectives().size(); i++) {//calculate d^2
-//                    d2 += Math.pow(ind.getFitnessOfObjectiveByIndex(i) - optimalInd.getFitnessOfObjectiveByIndex(i), 2);
-//                }
-//                d = Math.sqrt(d2);
+            for (Individual optimalInd: paretoOptimalSet) {//iterate through optimal individuals, looking for min d^2
                 d = distance(ind, optimalInd);
                 if (d < min_d) min_d = d;
             }
@@ -218,7 +224,7 @@ public class Metrics {
     //funkcje do Hypervolume:
 
     //reference point for HV - individual with the objectives with the worst values found in set
-    //ALGOTYRM Z JMETAL NIE UŻYWA PUNKTU REFERENCYJNEGO, LICZY WZGLĘDEM POCZĄTKU UKŁADU WSPÓŁRZEDNYCH
+    //ALGOTYRM Z JMETAL NIE UŻYWA PUNKTU REFERENCYJNEGO, LICZY WZGLĘDEM POCZĄTKU UKŁADU WSPÓŁRZĘDNYCH
     private Individual generateReferencePoint(List<Individual> set1, List<Individual> set2, int numOfObjectives,
                                                        List<Integer> idsOfMinObjective){
         Individual referencePoint = new Individual();
@@ -265,7 +271,7 @@ public class Metrics {
    returns true if 'point1' dominates 'points2' with respect to the
    to the first 'noObjectives' objectives
    */
-    private static boolean dominates(Individual point1, Individual point2, int noOfObjectives) {
+    /*private*/public static boolean dominates(Individual point1, Individual point2, int noOfObjectives) { // działa
         int i;
         int betterInAnyObjective;
 
@@ -279,11 +285,24 @@ public class Metrics {
 
         return ((i >= noOfObjectives) && (betterInAnyObjective > 0));
     }
+//    private boolean dominatesOryginal(double point1[], double point2[], int noObjectives) {
+//        int i;
+//        int betterInAnyObjective;
+//
+//        betterInAnyObjective = 0;
+//        for (i = 0; i < noObjectives && point1[i] >= point2[i]; i++) {
+//            if (point1[i] > point2[i]) {
+//                betterInAnyObjective = 1;
+//            }
+//        }
+//
+//        return ((i >= noObjectives) && (betterInAnyObjective > 0));
+//    }
 
     /*
     Swaps individual [i] with individual [j] in list "front"
      */
-    private static void swap(List<Individual> front, int i, int j) {
+    /*private*/public static void swap(List<Individual> front, int i, int j) { // działa
         Individual temp;
 
         temp = front.get(i);
@@ -299,11 +318,10 @@ public class Metrics {
 //    }
 
 
-    /* all nondominated points regarding the first 'noObjectives' dimensions
-    are collected; the points referenced by 'front[0..noPoints-1]' are
-    considered; 'front' is resorted, such that 'front[0..n-1]' contains
+    /* all nondominated points regarding the first 'noObjectives' dimensions are collected; the points referenced by
+    'front[0..noPoints-1]' are considered; 'front' is resorted, such that 'front[0..n-1]' contains
     the nondominated points; n is returned */
-    private static int filterNondominatedSet(List<Individual> set, int noPoints, int noOfObjectives) {
+    /*private*/public static int filterNondominatedSet(List<Individual> set, int noPoints, int noOfObjectives) { // działa
         int i = 0, j;
         int n = noPoints;
 
@@ -315,7 +333,8 @@ public class Metrics {
                     n--;
                     swap(set, j, n);
                 } else if (dominates(set.get(j), set.get(i), noOfObjectives)) {
-	                /* remove point 'i' */
+                /* remove point 'i'; ensure that the point copied to index 'i'
+                   is considered in the next outer loop (thus, decrement i) */
                     n--;
                     swap(set, i, n);
                     i--;
@@ -359,9 +378,10 @@ public class Metrics {
 //    }
 
 
-    /* calculate next value regarding dimension 'objective'; consider
-     points referenced in 'front[0..noPoints-1]' */
-    private static double surfaceUnchangedTo(List<Individual> set, int objective) {
+    /* calculate min value regarding dimension 'objective'; consider
+     points referenced in 'front[0..noPoints-1]'
+     znajduje minimalną wartość na danym kryterium spośród wszytstkich osobników*/
+    /*private*/public static double surfaceUnchangedTo(List<Individual> set, int objective) { // działa
         double value;
 
         if(set.size() >= 1){
@@ -398,19 +418,20 @@ public class Metrics {
 //        return minValue;
 //    }
 
-    /* remove all points which have a value <= 'threshold' regarding the
-     dimension 'objective'; the points referenced by
-     'front[0..noPoints-1]' are considered; 'front' is resorted, such that
-     'front[0..n-1]' contains the remaining points; 'n' is returned */
-    // TODO trzeba zwrócić uwagę, gdy kryteria jest MIN (a nie MAX), nie wiem czy tutaj je inaczej obsłużyć,
+    /* remove all points which have a value <= 'threshold' regarding the dimension 'objective'; the points referenced by
+     'front[0..noPoints-1]' are considered; 'front' is resorted, such that 'front[0..n-1]' contains the remaining points;
+     'n' is returned */
+    // TODO trzeba zwrócić uwagę, gdy kryteria są MIN (a nie MAX), nie wiem czy tutaj je inaczej obsłużyć,
     // TODO czy gdzieś wcześniej zamienić je na MAX?
-    private static int reduceNondominatedSet(List<Individual> set, int noPoints, int objective, double threshold) {
+    /*private*/public static int reduceNondominatedSet(List<Individual> set, int noPoints, int objective, double threshold) {
         int n = noPoints;
+        int i;
 
-        for (int i = 0; i < n; i++){
+        for (i = 0; i < n; i++){
             if(set.get(i).getFitnessOfObjectiveByIndex(objective) <= threshold){
                 n--;
                 swap(set, i, n);
+                i--;// DODANA LINIA !!!
             }
         }
 
@@ -433,7 +454,7 @@ public class Metrics {
 //    }
 
     //Hypervolume - HV: ACCURACY, DIVERSITY, CARDINALITY
-    public static double HV_metric(List<Individual>  front, int noPoints, int noObjectives) {
+    public static double calculateHypervolume(List<Individual> front, int noPoints, int noObjectives) {
         int n = noPoints;
         double volume = 0, distance = 0;
 
@@ -449,7 +470,7 @@ public class Metrics {
                 }
                 tempVolume = front.get(0).getFitnessOfObjectiveByIndex(0);
             } else {
-                tempVolume = HV_metric(front, n, noObjectives - 1);
+                tempVolume = calculateHypervolume(front, nonDominatedPoints, noObjectives - 1);
             }
 
             tempDistance = surfaceUnchangedTo(front, noObjectives - 1);

@@ -44,4 +44,16 @@ public class Individual {
 
         return true;
     }
+
+    @Override
+    public String toString(){
+        String str = "[";
+        for (Double i : fitnessOfObjectives){
+            str += Double.toString(i) + " ";
+        }
+        str = str.substring(0, str.length() - 1);
+        str += "]";
+
+        return str;
+    }
 }
