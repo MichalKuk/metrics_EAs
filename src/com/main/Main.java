@@ -25,13 +25,13 @@ public class Main {
         ind = new Individual(l);
         individuals.add(ind);
 
-//        l = new ArrayList<>(List.of(3.0, 10.0, 5.5));
-//        ind = new Individual(l);
-//        individuals.add(ind);
-//
-//        l = new ArrayList<>(List.of(3.0, 10.0, 6.0));
-//        ind = new Individual(l);
-//        individuals.add(ind);
+        l = new ArrayList<>(List.of(3.0, 10.0, 5.5));
+        ind = new Individual(l);
+        individuals.add(ind);
+
+        l = new ArrayList<>(List.of(3.0, 10.0, 6.0));
+        ind = new Individual(l);
+        individuals.add(ind);
 
 //        System.out.println("Individual toString: " + ind);
 
@@ -96,9 +96,9 @@ public class Main {
 //        }
 
         //Metrics.surfaceUnchangedTo()
-//        for (Individual i1: individuals) {
-//            System.out.println(i1);
-//        }
+        for (Individual i1: individuals) {
+            System.out.println(i1);
+        }
 //        for(int ii = 0; ii < noOfObjectives; ii++){
 //            System.out.println("Min on objective " + ii + ": " + Metrics.surfaceUnchangedTo(individuals, ii));
 //        }

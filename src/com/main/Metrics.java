@@ -271,7 +271,7 @@ public class Metrics {
    returns true if 'point1' dominates 'points2' with respect to the
    to the first 'noObjectives' objectives
    */
-    /*private*/public static boolean dominates(Individual point1, Individual point2, int noOfObjectives) { // działa
+    private static boolean dominates(Individual point1, Individual point2, int noOfObjectives) { // działa
         int i;
         int betterInAnyObjective;
 
@@ -302,7 +302,7 @@ public class Metrics {
     /*
     Swaps individual [i] with individual [j] in list "front"
      */
-    /*private*/public static void swap(List<Individual> front, int i, int j) { // działa
+    private static void swap(List<Individual> front, int i, int j) { // działa
         Individual temp;
 
         temp = front.get(i);
@@ -321,7 +321,7 @@ public class Metrics {
     /* all nondominated points regarding the first 'noObjectives' dimensions are collected; the points referenced by
     'front[0..noPoints-1]' are considered; 'front' is resorted, such that 'front[0..n-1]' contains
     the nondominated points; n is returned */
-    /*private*/public static int filterNondominatedSet(List<Individual> set, int noPoints, int noOfObjectives) { // działa
+    private static int filterNondominatedSet(List<Individual> set, int noPoints, int noOfObjectives) { // działa
         int i = 0, j;
         int n = noPoints;
 
@@ -381,24 +381,24 @@ public class Metrics {
     /* calculate min value regarding dimension 'objective'; consider
      points referenced in 'front[0..noPoints-1]'
      znajduje minimalną wartość na danym kryterium spośród wszytstkich osobników*/
-    /*private*/public static double surfaceUnchangedTo(List<Individual> set, int objective) { // działa
-        double value;
+    private static double surfaceUnchangedTo(List<Individual> set, int noPoints, int objective) { // !!!!!! przywrócić oryginał - 3 argumenty
+        int i;
+        double minValue, value;
 
-        if(set.size() >= 1){
-            double minValue = set.get(0).getFitnessOfObjectiveByIndex(objective);
-
-            for (Individual point : set) {
-                value = point.getFitnessOfObjectiveByIndex(objective);
-                if (value < minValue) {
-                    minValue = value;
-                }
-            }
-
-            return minValue;
+        if (noPoints < 1) {
+            //zwróć error
+            return -1;
         }
 
-        //jakiś error czy exception zamist return -1?
-        return -1;
+        minValue = set.get(0).getFitnessOfObjectiveByIndex(objective);
+        for (i = 1; i < noPoints; i++) {
+            value = set.get(i).getFitnessOfObjectiveByIndex(objective);//front[i][objective];
+            if (value < minValue) {
+                minValue = value;
+            }
+        }
+
+        return minValue;
     }
 //    private double surfaceUnchangedToOryginal(double[][] front, int noPoints, int objective) {
 //        int i;
@@ -423,7 +423,7 @@ public class Metrics {
      'n' is returned */
     // TODO trzeba zwrócić uwagę, gdy kryteria są MIN (a nie MAX), nie wiem czy tutaj je inaczej obsłużyć,
     // TODO czy gdzieś wcześniej zamienić je na MAX?
-    /*private*/public static int reduceNondominatedSet(List<Individual> set, int noPoints, int objective, double threshold) {
+    private static int reduceNondominatedSet(List<Individual> set, int noPoints, int objective, double threshold) {
         int n = noPoints;
         int i;
 
@@ -473,7 +473,7 @@ public class Metrics {
                 tempVolume = calculateHypervolume(front, nonDominatedPoints, noObjectives - 1);
             }
 
-            tempDistance = surfaceUnchangedTo(front, noObjectives - 1);
+            tempDistance = surfaceUnchangedTo(front, n,noObjectives - 1);
             volume += tempVolume * (tempDistance - distance);
             distance = tempDistance;
             n = reduceNondominatedSet(front, n, noObjectives - 1, distance);
@@ -531,6 +531,7 @@ public class Metrics {
 //        return d;
 //    }
 
+
     // funkcje do Uniform Distribution:
     public static int sh(Individual a, Individual b, double sigma){
         if (distance(a,b) < sigma) return 1;
@@ -584,7 +585,7 @@ public class Metrics {
     public static double meanDistance(List<Individual> set, List<Individual> paretoOptimalSet){
         double d = 0, min_d = Double.MAX_VALUE, sum_d = 0, mean_d = 0;
 
-//        for (Individual ind: set) {//iterate thorugh test individuals
+//        for (Individual ind: set) {//iterate through test individuals
 //            for (Individual optimalInd: paretoOptimalSet) {//iterate thorugh optimal individuals, summing d
 //                d2 = 0;
 //                for (int i = 0; i < ind.getFitnessOfObjectives().size(); i++) {//calculate d^2
