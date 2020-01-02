@@ -154,25 +154,11 @@ public class Metrics {
         return GD;
     }
 
-    //stare, był jeden błąd i szukame min_d^2, a nie min_d, chociaż powinno wyjść to samo
-//    public static double generationalDistance(List<Individual> set, List<Individual> paretoOptimalSet){
-//        double d2 = 0, min_d2 = Double.MAX_VALUE, sumd2 = 0, GD = -1;
-//        for (Individual ind: set) {//iterate through examined individuals
-//            for (Individual optimalInd: paretoOptimalSet) {//iterate thorugh optimal individuals, looking for min d^2
-//                d2 = Math.pow(distance(ind, optimalInd), 2);
-//                if (d2 < min_d2) min_d2 = d2;
-//            }
-//            sumd2 += min_d2; // += min_d2 !!!
-//        }
-//        GD = Math.sqrt(sumd2)/set.size();
-//
-//        return GD;
-//    }
 
     /**
      *
      * @param set - examined set of individuals
-     * @param paretoOptimalSet - true Pareto optimal set or artificall optimal set of individuals (or set of 1 individual)
+     * @param paretoOptimalSet - true Pareto optimal set or artificial optimal set of individuals (or set of 1 individual)
      *      see Metrics.generateOptimalIndividual()
      *
      * @return Inverted Generational distance
@@ -204,11 +190,6 @@ public class Metrics {
         for (Individual ind: set) {//iterate thorugh test individuals
             d = 0;
             for (Individual optimalInd: paretoOptimalSet) {//iterate thorugh optimal individuals, looking for min d for this ind
-//                for (int i = 0; i < ind.getFitnessOfObjectives().size(); i++) {//calculate d^2
-//                    d += Math.pow(ind.getFitnessOfObjectiveByIndex(i) - optimalInd.getFitnessOfObjectiveByIndex(i), 2);
-//                }
-//                d = Math.sqrt(d);
-//                if (d > max_d) max_d = d;
                 d = distance(ind, optimalInd);
                 if (d < min_d) min_d = d; // odległość do najbliższego pkt z paretoOptimalSet (min)
             }
@@ -421,8 +402,9 @@ public class Metrics {
     /* remove all points which have a value <= 'threshold' regarding the dimension 'objective'; the points referenced by
      'front[0..noPoints-1]' are considered; 'front' is resorted, such that 'front[0..n-1]' contains the remaining points;
      'n' is returned */
-    // TODO trzeba zwrócić uwagę, gdy kryteria są MIN (a nie MAX), nie wiem czy tutaj je inaczej obsłużyć,
-    // TODO czy gdzieś wcześniej zamienić je na MAX?
+    // TODO trzeba zwrócić uwagę, gdy kryteria są MIN (a nie MAX), nie wiem gdzie je obsłużyć, chyba przed wykonaniem
+    // TODO HV zamienić je na MAX i wtedy wykonać HV?
+    // TODO np. zamienić liczby na ich odwrotność:  min(2, 5 ,7) -> max( 1/2, 1/5, 1/7)
     private static int reduceNondominatedSet(List<Individual> set, int noPoints, int objective, double threshold) {
         int n = noPoints;
         int i;
@@ -453,6 +435,13 @@ public class Metrics {
 //        return n;
 //    }
 
+    /**
+     * Calculates hypervolume
+     * @param front - examined set of individuals
+     * @param noPoints - number of points in set (changes during recursion)
+     * @param noObjectives - number of objevtives
+     * @return
+     */
     //Hypervolume - HV: ACCURACY, DIVERSITY, CARDINALITY
     public static double calculateHypervolume(List<Individual> front, int noPoints, int noObjectives) {
         int n = noPoints;
@@ -533,12 +522,12 @@ public class Metrics {
 
 
     // funkcje do Uniform Distribution:
-    public static int sh(Individual a, Individual b, double sigma){
+    private static int sh(Individual a, Individual b, double sigma){
         if (distance(a,b) < sigma) return 1;
         else return 0;
     }
 
-    public static int nicheCount(Individual a, List<Individual> set, double sigma){
+    private static int nicheCount(Individual a, List<Individual> set, double sigma){
         int count = 0;
         for (Individual ind: set ) {
             if (!(ind == a)){ //if("ind" nie jest tym samym obiektem, co "a") - liczymy sh() z każdym osobnikiem, oprócz siebie samego
@@ -548,7 +537,7 @@ public class Metrics {
         return count;
     }
 
-    public static double meanNicheCount(List<Individual> set, double sigma){
+    private static double meanNicheCount(List<Individual> set, double sigma){
         double sum = 0;
         for (Individual ind: set) {
             sum += nicheCount(ind, set, sigma);
@@ -558,7 +547,7 @@ public class Metrics {
         return mean;
     }
 
-    public static double standardDeviationOfNicheCount(List<Individual> set, double sigma){
+    private static double standardDeviationOfNicheCount(List<Individual> set, double sigma){
         double std = 0;
         double mean = meanNicheCount(set,sigma);
         for (Individual ind: set) {
@@ -569,6 +558,12 @@ public class Metrics {
         return std;
     }
 
+    /**
+     *
+     * @param set - examined set of individuals
+     * @param sigma - a user-defined parameter to quantify the closeness
+     * @return Uniform Distribution
+     */
     //Uniform Distribution (UD)
     public static double uniformDistribution(List<Individual> set, double sigma){
         double UD = -1;
@@ -582,25 +577,12 @@ public class Metrics {
 
     // funkcja do Spacing:
     //mean of distances to closest point from true Pareto optimal front
-    public static double meanDistance(List<Individual> set, List<Individual> paretoOptimalSet){
-        double d = 0, min_d = Double.MAX_VALUE, sum_d = 0, mean_d = 0;
+    private static double meanDistance(List<Individual> set, List<Individual> paretoOptimalSet){
+        double d = 0, min_d = Double.MAX_VALUE, mean_d = 0;
 
-//        for (Individual ind: set) {//iterate through test individuals
-//            for (Individual optimalInd: paretoOptimalSet) {//iterate thorugh optimal individuals, summing d
-//                d2 = 0;
-//                for (int i = 0; i < ind.getFitnessOfObjectives().size(); i++) {//calculate d^2
-//                    d2 += Math.pow(ind.getFitnessOfObjectiveByIndex(i) - optimalInd.getFitnessOfObjectiveByIndex(i), 2);
-//                }
-//                d = Math.sqrt(d2);
-//                sum_d += d;
-//            }
-//            mean_d = sum_d/paretoOptimalSet.size();
-//            wholeMean_d += mean_d;
-//        }
-//        wholeMean_d = wholeMean_d/set.size();
-        for (Individual ind: set) {//iterate thorugh test individuals
+        for (Individual ind: set) {//iterate through test individuals
             min_d = Double.MAX_VALUE;
-            for (Individual optimalInd: paretoOptimalSet) {//iterate thorugh optimal individuals, searching for min d
+            for (Individual optimalInd: paretoOptimalSet) {//iterate through optimal individuals, searching for min d
                 d = distance(ind, optimalInd);
                 if(d < min_d) min_d = d;
             }
@@ -611,21 +593,27 @@ public class Metrics {
         return mean_d;
     }
 
+    /**
+     *
+     * @param set - examined set of individuals
+     * @param paretoOptimalSet - true Pareto optimal set or artificial optimal set of individuals (or set of 1 individual)
+     *      see Metrics.generateOptimalIndividual()
+     * @return Spacing
+     */
     //Spacing
     public static double spacing(List<Individual> set, List<Individual> paretoOptimalSet){
-        double d2 = 0, d = 0, min_d2 = Double.MAX_VALUE, sum_d = 0, mean_d = 0, s = -1;
+        double d = 0, min_d = Double.MAX_VALUE, sum_d = 0, mean_d = 0, s = -1;
         mean_d = meanDistance(set, paretoOptimalSet);
-        for (Individual ind: set) {//iterate thorugh test individuals
-            for (Individual optimalInd: paretoOptimalSet) {//iterate thorugh optimal individuals, looking for min d^2
-                d2 = 0;
-                for (int i = 0; i < ind.getFitnessOfObjectives().size(); i++) {//calculate d^2
-                    d2 += Math.pow(ind.getFitnessOfObjectiveByIndex(i) - optimalInd.getFitnessOfObjectiveByIndex(i), 2);
-                }
-                if (d2 < min_d2) min_d2 = d2;
+
+        for (Individual ind: set) {//iterate through test individuals
+            min_d = Double.MAX_VALUE;
+            for (Individual optimalInd: paretoOptimalSet) {//iterate through optimal individuals, searching for min d
+                d = distance(ind, optimalInd);
+                if(d < min_d) min_d = d;
             }
-            d = Math.sqrt(d2);
             sum_d += Math.pow(d - mean_d, 2);
         }
+
         s = Math.sqrt(sum_d/set.size());
 
         return s;
@@ -636,23 +624,32 @@ public class Metrics {
 
 
 //SPREAD
+
+    /**
+     *
+     * @param set - examined set of individuals
+     * @param paretoOptimalSet - true Pareto optimal set or artificial optimal set of individuals (or set of 1 individual)
+     *      see Metrics.generateOptimalIndividual()
+     * @param noObjectives - number of objectives
+     * @return Maximum Spread
+     */
     //Maximum Spread (MS)
-    public static double maximumSpread(List<Individual> set, List<Individual> paretoOptimalSet, int dimensions){
+    public static double maximumSpread(List<Individual> set, List<Individual> paretoOptimalSet, int noObjectives){
         //double max_set = -Double.MAX_VALUE,  min_set = Double.MAX_VALUE,  max_optimal = -Double.MAX_VALUE,  min_optimal = Double.MAX_VALUE;
-        double[] max_set = new double[dimensions];
-        double[] min_set = new double[dimensions];
-        double[] max_trueParetoFront = new double[dimensions];
-        double[] min_trueParetoFront = new double[dimensions];
+        double[] max_set = new double[noObjectives];
+        double[] min_set = new double[noObjectives];
+        double[] max_trueParetoFront = new double[noObjectives];
+        double[] min_trueParetoFront = new double[noObjectives];
         Arrays.fill(max_set, -Double.MAX_VALUE);
         Arrays.fill(max_trueParetoFront, -Double.MAX_VALUE);
         Arrays.fill(min_set, Double.MAX_VALUE);
         Arrays.fill(min_trueParetoFront, Double.MAX_VALUE);
 
-        double[] min = new double[dimensions];
-        double[] max = new double[dimensions];
+        double[] min = new double[noObjectives];
+        double[] max = new double[noObjectives];
         double sum = 0, MS = -1;
 
-        for (int i = 0; i < dimensions; i++) {
+        for (int i = 0; i < noObjectives; i++) {
             for (Individual ind: set) {
                 if (ind.getFitnessOfObjectiveByIndex(i) > max_set[i]) max_set[i] = ind.getFitnessOfObjectiveByIndex(i);
                 if (ind.getFitnessOfObjectiveByIndex(i) < min_set[i]) min_set[i] = ind.getFitnessOfObjectiveByIndex(i);
@@ -663,13 +660,14 @@ public class Metrics {
             }
         }
 
-        for (int i = 0; i < dimensions; i++) {
+        for (int i = 0; i < noObjectives; i++) {
             max[i] = Math.min(max_set[i],max_trueParetoFront[i]);
             min[i] = Math.max(min_set[i],min_trueParetoFront[i]);
 
-            sum += Math.pow((max[i] - min[i]) / (max_trueParetoFront[i] - min_trueParetoFront[i]),2);
+            sum += Math.pow((max[i] - min[i]) / (max_trueParetoFront[i] - min_trueParetoFront[i]),2); /* GDY W
+            TRUE PARETO FRONT JEST 1 OSOBNIK, TO (max_trueParetoFront[i] - min_trueParetoFront[i]) == 0 I WYNIK = NaN !!!*/
         }
-        MS = Math.sqrt(sum/dimensions);
+        MS = Math.sqrt(sum/noObjectives);
 
         return MS;
     }

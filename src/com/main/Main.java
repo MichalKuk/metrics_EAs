@@ -12,14 +12,14 @@ public class Main {
         List<Individual> individuals = new ArrayList<>();
         List<Individual> trueParetoFront = new ArrayList<>();
 
-        //TESTY xD
+        //TESTY
         int noOfObjectives = 3;
         List<Double> l = new ArrayList<>(List.of(10.0, 5.0, 3.5));
         Individual ind = new Individual(l);
         individuals.add(ind);
 
-        ind = new Individual(l); //na wszelki wypadek, żeby to był inny obiekt o takich samych wartościach
-        trueParetoFront.add(ind);
+//        ind = new Individual(l); //na wszelki wypadek, żeby to był inny obiekt o takich samych wartościach
+//        trueParetoFront.add(ind);
 
         l = new ArrayList<>(List.of(5.5, 3.0, 2.0));
         ind = new Individual(l);
@@ -32,6 +32,14 @@ public class Main {
         l = new ArrayList<>(List.of(3.0, 10.0, 6.0));
         ind = new Individual(l);
         individuals.add(ind);
+
+        l = new ArrayList<>(List.of(10.0, 10.5, 6.0));
+        ind = new Individual(l); //na wszelki wypadek, żeby to był inny obiekt o takich samych wartościach
+        trueParetoFront.add(ind);
+
+        l = new ArrayList<>(List.of(8.0, 8.0, 9.0));
+        ind = new Individual(l); //na wszelki wypadek, żeby to był inny obiekt o takich samych wartościach
+        trueParetoFront.add(ind);
 
 //        System.out.println("Individual toString: " + ind);
 
@@ -112,8 +120,22 @@ public class Main {
 //        }
 
         //HV
-        double HV = Metrics.calculateHypervolume(individuals, individuals.size(), noOfObjectives);
-        System.out.println("Hypervolume = " + HV);
+//        double HV = Metrics.calculateHypervolume(individuals, individuals.size(), noOfObjectives);
+//        System.out.println("Hypervolume = " + HV);
+
+        //DISTRIBUTION
+        //Metrics.uniformDistribution()
+//        double UD = Metrics.uniformDistribution(individuals,4.0);
+//        System.out.println("Uniform distribution = " + UD);
+
+        //Metrics.spacing()
+//        double s = Metrics.spacing(individuals, trueParetoFront);
+//        System.out.println("Spacing = " + s);
+
+        //SPREAD
+        //Metrics.maximumSpread()
+//        double MS = Metrics.maximumSpread(individuals, trueParetoFront, noOfObjectives);
+//        System.out.println("Maximum Spread = " + MS);
 
     }
 }
